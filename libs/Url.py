@@ -168,14 +168,10 @@ class Url:
             exit()
 
     def run(self):
-        stime = time.time()
-        printf("Total number of dictionary:"+str(self.dict_line.qsize())+"\n",
-               "normal")
+        self.build_report_file()
         for i in range(self.dict_line.qsize()):
             self.scan()
-        printf("")
-        printf("All works done! It takes "+str(time.time()-stime)[:5]+"s",
-               "normal")
+            self.reconnect()
 
     def reconnect(self):
         while 0 != self.fail_url.qsize():

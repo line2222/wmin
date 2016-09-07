@@ -86,9 +86,7 @@ def main():
         for i in range(url.qsize()):
             target = Url.Url(url.get(), dictionary,
                              timeout, proxy, delay, ua, ignore_text, method)
-            target.build_report_file()
             target.run()
-            target.reconnect()
 
 if __name__ == '__main__':
     try:
