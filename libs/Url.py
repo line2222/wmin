@@ -171,7 +171,7 @@ class Url:
         self.build_report_file()
         for i in range(self.dict_line.qsize()):
             self.scan()
-            self.reconnect()
+        self.reconnect()
 
     def reconnect(self):
         while 0 != self.fail_url.qsize():

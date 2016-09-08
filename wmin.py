@@ -31,8 +31,10 @@ def main():
     arg = argparse.ArgumentParser(usage=usage,
                                   description=description, epilog=epilog)
     printf(colorama.Fore.LIGHTBLUE_EX+banner+colorama.Fore.RESET)
-    arg.add_argument("-u", type=str, help="set target url", metavar="")
-    arg.add_argument("-U", type=str, help="set urls file", metavar="")
+    arg.add_argument("-u", type=str,
+                     help="set target url", default="", metavar="")
+    arg.add_argument("-U", type=str,
+                     help="set urls file", default="", metavar="")
     arg.add_argument("-d", type=str, help="set dictionary", metavar="")
     arg.add_argument("-D", type=str, help="set dictionary folder", metavar="")
     # arg.add_argument("-r", type=str, help="set report filename", metavar="")
@@ -62,7 +64,7 @@ def main():
     args = arg.parse_args()
     para = vars(args)
 
-    url = addon.deal_url(para["u"], para["U"])
+    url_list = addon.batch_deal(para["u"], para["U"])
     dictionary = addon.deal_dict(para["d"], para["D"])
     # report = addon.deal_report(para["r"])
     timeout = addon.deal_num(para["t"])
@@ -77,14 +79,14 @@ def main():
                "error")
         exit()
 
-    if url and dictionary is None:
-        for i in range(url.qsize()):
-            target = Url.Url(url.get(), "", timeout,
+    if url_list and dictionary is None:
+        for url in url_list:
+            target = Url.Url(url, "", timeout,
                              proxy, delay, ua, ignore_text, method)
             target.get_info()
-    elif url and dictionary:
-        for i in range(url.qsize()):
-            target = Url.Url(url.get(), dictionary,
+    elif url_list and dictionary:
+        for url in url_list:
+            target = Url.Url(url, dictionary,
                              timeout, proxy, delay, ua, ignore_text, method)
             target.run()
 
