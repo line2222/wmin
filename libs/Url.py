@@ -6,6 +6,9 @@ from random import randint
 from . import result
 from sys import version_info
 import socket
+import pdb
+from fake_useragent import UserAgent
+import traceback
 
 if version_info.major == 3:
     from .printf.py3 import printf, printweb
@@ -104,24 +107,44 @@ class Url:
     def build_report_file(self):
         self.report_filename = result.init_html(self.hostname)
 
+    def set_useragent(self):
+        fakeuseragent = UserAgent()
+        if self.ua[0] is None:
+            yield fakeuseragent.random
+        elif self.ua[0] == "Chrome":
+            yield fakeuseragent.chrome
+        elif self.ua[0] == "Firefox":
+            yield fakeuseragent.firefox
+        elif self.ua[0] == "Opera":
+            yield fakeuseragent.opera
+        elif self.ua[0] == "IE":
+            yield fakeuseragent.ie
+        elif self.ua[0] == "Edge":
+            yield fakeuseragent.edge
+        elif self.ua[0] == "Safari":
+            yield fakeuseragent.safari
+        else:
+            yield self.ua[randint(0, len(self.ua)-1)],
+
     def scan(self):
         url = self.url + self.dict_line.get_nowait()
-
+        # pdb.set_trace()
         try:
             # use appoint method
+
             kwargs = {"url": url,
                       "timeout": self.timeout,
                       "proxies": self.proxy[randint(0, len(self.proxy)-1)],
-                      "headers": self.ua[randint(0, len(self.ua)-1)],
+                      "headers": next(self.set_useragent()),
+                      # "headers": self.ua[randint(0, len(self.ua) - 1)],
                       "allow_redirects": False}
-
             if "get" == self.method:
+                print(kwargs["headers"])
                 response = requests.get(**kwargs)
             elif "post" == self.method:
                 response = requests.post(**kwargs)
             else:
                 response = requests.head(**kwargs)
-
             code = response.status_code
             html = response.text
 
@@ -140,6 +163,7 @@ class Url:
         except KeyboardInterrupt:
             exit()
         except Exception as e:
+            # traceback.print_exc()
             self.fail_url.put(url.replace(self.url, ""))
             printf(url + "\tConnect error", "error")
         time.sleep(self.delay)
@@ -184,4 +208,5 @@ class Url:
                     self.fail_url = queue.Queue()
                     self.run()
             except:
+                break
                 exit()
